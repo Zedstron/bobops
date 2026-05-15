@@ -1,1 +1,2 @@
 # bobops
+BobOps is an autonomous AI engineering organization that detects production incidents, performs root cause analysis, generates fixes, validates security and QA, and opens production-ready pull requests on github for human review and ready to go patch.
