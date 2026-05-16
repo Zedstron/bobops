@@ -3,14 +3,17 @@ import os
 from github import Github
 from datetime import datetime
 
-def pr_creator_bob(state):
+def pr_creator(state):
     token = os.getenv("GITHUB_TOKEN")
-    repo_name = state["branch_name"]
+    repo_name = state["repo_name"]
+    story_id = state.get("story_id")
 
     github = Github(token)
     repo = github.get_repo(repo_name)
 
     branch_name = f"team-of-bobs-{datetime.utcnow().strftime('%Y%m%d%H%M%S')}"
+    if story_id:
+        branch_name = f"team-of-bobs-task-{story_id}"
 
     base_branch = repo.default_branch
     source = repo.get_branch(base_branch)
@@ -20,10 +23,16 @@ def pr_creator_bob(state):
         sha=source.commit.sha
     )
 
+    if not state.get("qa_report"):
+        state["qa_report"] = "QA was disabled for this task"
+    
+    if not state.get("security_report"):
+        state["security_report"] = "Security Scanning was disabled for this task"
+
     pr = repo.create_pull(
-        title=f"[Team of Bobs] {state.get('task')}",
+        title=f"[Team of Bobs] {state.get('issue')}",
         body=f'''
-        ## Inspector Summary
+        ## Initial Logs Analysis & Findings
 
         {state.get("inspector_summary")}
 
@@ -34,6 +43,10 @@ def pr_creator_bob(state):
         ## QA Report
 
         {state.get("qa_report")}
+
+        ## Security & Vulnerability Assessment
+
+        {state.get("security_report")}
         '''.strip(),
             head=branch_name,
             base=base_branch

@@ -3,8 +3,6 @@ from bob import run_bob
 
 def inspector_bob(state):
     prompt = f"""
-    Task: {state.get('task') or ''}
-
     Log/Error Context:
     {state.get('log_context') or ''}
 

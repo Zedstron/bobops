@@ -2,11 +2,12 @@
 from typing import TypedDict, List, Dict, Any
 
 class TeamOfBobsState(TypedDict, total=False):
-    task: str
+    issue: str
     developer_role: str
 
     invoke_story_bob: bool
     invoke_qa_bob: bool
+    invoke_security_bob: bool
 
     log_context: str
     inspector_summary: str
@@ -18,10 +19,9 @@ class TeamOfBobsState(TypedDict, total=False):
     generated_tests: str
 
     qa_report: str
-
-    branch_name: str
     pr_url: str
 
+    repo_name: str
     repo_path: str
 
     metadata: Dict[str, Any]

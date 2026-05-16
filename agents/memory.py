@@ -24,24 +24,20 @@ def store_incident_resolution(issue, resolution):
     print("Storing resolution into memory database...")
 
 
-def memory_bob(state):
-    if state.get("qa_report"):
-        issue = state.get("task")
+def save_memory(state):
+    issue = state.get("issue")
+    resolution = {
+        "architecture": state.get("architecture_plan"),
+        "code_changes": state.get("code_changes"),
+        "qa_report": state.get("qa_report"),
+    }
+    store_incident_resolution(issue, resolution)
+    state["memory_store_complete"] = True
+    return state
 
-        resolution = {
-            "architecture": state.get("architecture_plan"),
-            "code_changes": state.get("code_changes"),
-            "qa_report": state.get("qa_report"),
-        }
-
-        store_incident_resolution(issue, resolution)
-
-        state["memory_store_complete"] = True
-    else:
-        task = state.get("task")
-
-        matches = retrieve_similar_incidents(task)
-
-        state["memory_matches"] = matches
+def get_memory(state):
+    task = state.get("task")
+    matches = retrieve_similar_incidents(task)
+    state["memory_matches"] = matches
 
     return state
