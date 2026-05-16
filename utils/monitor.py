@@ -1,10 +1,10 @@
 import re
 import time
 import hashlib
+from threading import Event
 from dataclasses import dataclass
 
 LEVELS = ("ERROR", "WARNING", "CRITICAL")
-
 TRACEBACK_START = "Traceback (most recent call last):"
 
 @dataclass
@@ -15,13 +15,13 @@ class LogEvent:
     exception_type: str | None
     traceback: str
     raw: str
-
+    status: str | None
 
 def fingerprint(text: str):
     return hashlib.md5(text.encode()).hexdigest()
 
 
-def monitor_log(path):
+def monitor_log(path, event: Event = None):
     with open(path, "r", encoding="utf-8", errors="ignore") as f:
         f.seek(0, 2)
 
@@ -29,6 +29,9 @@ def monitor_log(path):
         collecting = False
 
         while True:
+            if event and event.is_set():
+                break
+
             line = f.readline()
 
             if not line:

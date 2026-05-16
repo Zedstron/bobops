@@ -1,5 +1,5 @@
 from fastapi import FastAPI, Request, WebSocket, WebSocketDisconnect, HTTPException, status
-from utils.helpers import save_repo, get_repos, remove_repo
+from utils.db import save_repo, get_repos, remove_repo, save_incident, get_incidents
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import HTMLResponse
 from fastapi.staticfiles import StaticFiles
@@ -25,11 +25,22 @@ app.mount("/assets", StaticFiles(directory="assets"), name="assets")
 templates = Jinja2Templates(directory="templates")
 
 def new_error_received(detail, repo):
-    pass
+    save_incident(detail, repo)
 
 @app.get("/", response_class=HTMLResponse)
 async def index(request: Request):
     return templates.TemplateResponse("index.html", { "request": request })
+
+@app.get("/incidents", response_class=HTMLResponse)
+async def index(request: Request):
+    return templates.TemplateResponse("incident.html", { "request": request })
+
+@app.post("/incident/{incident_id}")
+async def trigger_fix(incident_id: str):
+    return {
+        "status": True,
+        "message": "The task has been handed over to the Bob"
+    }
 
 @app.get("/repo", response_class=HTMLResponse)
 async def index(request: Request):
@@ -46,7 +57,7 @@ async def add_repo(action: str, repo: Repo):
 
         if not log_file:
             raise HTTPException(
-                status_code=status.HTTP_409_CONFLICT,
+                status_code=status.HTTP_406_NOT_ACCEPTABLE,
                 detail="Cannot start no log file found, make sure the project is running"
             )
         
@@ -127,11 +138,14 @@ async def delete_repo(repo_name: str):
 
 socket_manager = SocketManager()
 
-@app.websocket("/ws")
+@app.websocket("/incidents/ws")
 async def websocket_endpoint(websocket: WebSocket):
     await socket_manager.connect(websocket)
 
     try:
+        for incident in get_incidents():
+            await websocket.send_json(incident)
+
         while True:
             data = await websocket.receive_text()
             await socket_manager.broadcast(data)
