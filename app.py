@@ -1,23 +1,15 @@
 from fastapi import FastAPI, Request, WebSocket, WebSocketDisconnect, HTTPException, status
 from utils.helpers import save_repo, get_repos, remove_repo
-from pydantic import BaseModel, field_validator, Field
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import HTMLResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
+from utils.helpers import find_log_file
+from monitor_pool import LogMonitorPool
 from sockethandler import SocketManager
-import re
+from utils.models import *
 
-class RepoCreate(BaseModel):
-    name: str = Field(..., example="username/reponame")
-    
-    @field_validator('name')
-    def validate_github_format(cls, v):
-        v = v.strip().replace('https://github.com/', '').replace('http://github.com/', '')
-        if not re.match(r'^[\w\-\.]+/[\w\-\.]+$', v):
-            raise ValueError('Must be GitHub format: username/reponame')
-        return v
-
+pool = LogMonitorPool()
 app = FastAPI()
 
 app.add_middleware(
@@ -32,16 +24,57 @@ app.mount("/assets", StaticFiles(directory="assets"), name="assets")
 
 templates = Jinja2Templates(directory="templates")
 
+def new_error_received(detail, repo):
+    pass
+
 @app.get("/", response_class=HTMLResponse)
 async def index(request: Request):
     return templates.TemplateResponse("index.html", { "request": request })
 
 @app.get("/repo", response_class=HTMLResponse)
 async def index(request: Request):
-    return templates.TemplateResponse("repo.html", { "request": request, "repos": get_repos() })
+    repos = get_repos()
+    for repo in repos:
+        repo["monitoring"] = pool.is_running(repo.get("full_name"))
+
+    return templates.TemplateResponse("repo.html", { "request": request, "repos": repos })
+
+@app.put("/repo", status_code=status.HTTP_201_CREATED)
+async def add_repo(action: str, repo: Repo):
+    if action == "start":
+        log_file = find_log_file(repo.name)
+
+        if not log_file:
+            raise HTTPException(
+                status_code=status.HTTP_409_CONFLICT,
+                detail="Cannot start no log file found, make sure the project is running"
+            )
+        
+        if pool.is_running(repo.name):
+            raise HTTPException(
+                status_code=status.HTTP_409_CONFLICT,
+                detail="A monitor is already running on the repo, Aborting"
+            )
+        
+        pool.start_monitor(repo.name, log_file, new_error_received)
+        return { "message": "Successfully started the error monitor on requested repo" }
+    
+    elif action == "stop":
+        if not pool.stop_monitor(repo.name):
+            raise HTTPException(
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                detail="Oops! Technical issue occured while halting monitor, Try again later"
+            )
+        
+        return { "message": "Successfully halted the monitor for the requested repository" }
+    
+    raise HTTPException(
+        status_code=status.HTTP_400_BAD_REQUEST,
+        detail="Invalid action defined, aborting request"
+    )
 
 @app.post("/repo", status_code=status.HTTP_201_CREATED)
-async def add_repo(repo: RepoCreate):
+async def add_repo(repo: Repo):
     repo_name = repo.name.strip().replace('https://github.com/', '').replace('http://github.com/', '')
 
     if any(r['full_name'] == repo_name for r in get_repos()):
@@ -62,17 +95,21 @@ async def add_repo(repo: RepoCreate):
         "username": username,
         "name": name,
         "full_name": repo_name,
-        "summary": f"Autonomous monitoring enabled • AI-powered incident resolution",
+        "summary": "",
         "status": "active"
     }
     
-    save_repo(new_repo)
+    if save_repo(new_repo):
+        return {
+            "success": True,
+            "message": f"Repository {repo_name} connected",
+            "repo": new_repo
+        }
     
-    return {
-        "success": True,
-        "message": f"Repository {repo_name} connected",
-        "repo": new_repo
-    }
+    raise HTTPException(
+        status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+        detail="Error Occured while clonning the repository try again later"
+    )
 
 @app.delete("/repo", status_code=status.HTTP_200_OK)
 async def delete_repo(repo_name: str):

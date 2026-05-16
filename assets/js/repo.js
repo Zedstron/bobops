@@ -89,13 +89,51 @@ function removeRepo(repoFullName) {
         fetch(`/repo?repo_name=${encodeURIComponent(repoFullName)}`, {
             method: 'DELETE'
         })
-            .then(res => res.ok ? window.location.reload() : showToast('Failed to remove repo', 'error'))
-            .catch(() => showToast('Network error', 'error'));
+        .then(res => res.ok ? window.location.reload() : showToast('Failed to remove repo', 'error'))
+        .catch(() => showToast('Network error', 'error'));
     }
 }
 
 function startMonitoring(repoFullName) {
-    showToast(`🚀 Starting monitoring for ${repoFullName}...`, 'success');
+    if (confirm(`Are you sure you want to start Monitoring ${repoFullName}?`)) {
+        fetch(`/repo?action=start`, {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ name: repoFullName })
+        })
+        .then(async (res) => {
+            const data = await res.json().catch(() => ({}));
+            if (!res.ok) {
+                showToast(data.detail || "Unknown error", 'error');
+                return;
+            }
+            window.location.reload();
+        })
+        .catch(() => showToast('Network error', 'error'));
+    }
+}
+
+function stopMonitoring(repoFullName) {
+    if (confirm(`Are you sure you want to stop Monitoring ${repoFullName}?`)) {
+        fetch(`/repo?action=stop`, {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ name: repoFullName })
+        })
+        .then(async (res) => {
+            const data = await res.json().catch(() => ({}));
+            if (!res.ok) {
+                showToast(data.detail || "Unknown error", 'error');
+                return;
+            }
+            window.location.reload();
+        })
+        .catch(() => showToast('Network error', 'error'));
+    }
 }
 
 window.addEventListener('load', function () {

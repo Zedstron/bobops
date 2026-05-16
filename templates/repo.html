@@ -78,9 +78,15 @@
                         </td>
                         <td>
                             <div class="repo-actions">
-                                <button class="btn-icon success" title="Monitor" onclick="startMonitoring('{{ repo.username }}/{{ repo.name }}')">
+                                {% if not repo.monitoring %}
+                                <button class="btn-icon success" title="Start Monitoring" onclick="startMonitoring('{{ repo.username }}/{{ repo.name }}')">
                                     <i class="fas fa-play"></i>
                                 </button>
+                                {% else %}
+                                <button class="btn-icon warning" title="Stop Monitoring" onclick="stopMonitoring('{{ repo.username }}/{{ repo.name }}')">
+                                    <i class="fas fa-stop"></i>
+                                </button>
+                                {% endif %}
                                 <button class="btn-icon danger" title="Remove" onclick="removeRepo('{{ repo.username }}/{{ repo.name }}')">
                                     <i class="fas fa-trash"></i>
                                 </button>

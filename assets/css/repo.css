@@ -340,6 +340,10 @@
      background: var(--success);
  }
 
+  .btn-icon.warning:hover {
+      background: var(--warning);
+  }
+
  /* Floating Action Button */
  .fab {
      position: fixed;
