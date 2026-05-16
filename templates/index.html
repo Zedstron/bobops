@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>BobOps | Autonomous AI Engineering</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+    <link rel="stylesheet" href="/assets/css/index.css" />
+</head>
+
+<body>
+    <div class="bg-animation"></div>
+    <div class="particles"></div>
+
+    <nav>
+        <div class="logo">
+            <i class="fas fa-robot"></i>
+            BobOps
+        </div>
+        <ul class="nav-links">
+            <li><a href="#features">Features</a></li>
+            <li><a href="#workflow">How It Works</a></li>
+            <li><a href="/repo">Give it a Try</a></li>
+        </ul>
+    </nav>
+
+    <section class="hero">
+        <div class="hero-content">
+            <h1>Production Incidents? Bob Fixes Them.</h1>
+            <p>BobOps detects errors in real-time, performs root cause analysis, and autonomously generates production-ready fixes — all while you focus on building.</p>
+
+            <div class="cta-buttons">
+                <a href="/repo" class="btn btn-primary">
+                    <i class="fas fa-rocket"></i>
+                    Start Using App
+                </a>
+                <a href="#workflow" class="btn btn-secondary">
+                    <i class="fas fa-play-circle"></i>
+                    See How It Works
+                </a>
+            </div>
+
+            <div class="hero-visual">
+                <div class="terminal-mockup">
+                    <div class="terminal-header">
+                        <div class="dot red"></div>
+                        <div class="dot yellow"></div>
+                        <div class="dot green"></div>
+                    </div>
+                    <div class="terminal-body">
+                        <div><span class="cmd">$</span> bobops monitor --repo my-app</div>
+                        <div style="margin-top: 0.5rem;">[<span class="highlight">INFO</span>] Monitoring logs in real-time...</div>
+                        <div>[<span class="error">ERROR</span>] NullPointerException at UserService.java:42</div>
+                        <div>[<span class="success">BOB</span>] Analyzing root cause...</div>
+                        <div>[<span class="success">BOB</span>] Generating fix + security validation...</div>
+                        <div>[<span class="success">✓</span>] PR #127 created: fix/null-pointer-user-service</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="features" id="features">
+        <div class="section-title">
+            <h2>Why BobOps?</h2>
+            <p>Autonomous engineering that works while you sleep</p>
+        </div>
+
+        <div class="features-grid">
+            <div class="feature-card">
+                <div class="feature-icon">
+                    <i class="fas fa-search"></i>
+                </div>
+                <h3>Real-time Detection</h3>
+                <p>Monitor production logs instantly. Get alerted the moment an incident occurs — no more waiting for user complaints.</p>
+            </div>
+
+            <div class="feature-card">
+                <div class="feature-icon">
+                    <i class="fas fa-brain"></i>
+                </div>
+                <h3>AI Root Cause Analysis</h3>
+                <p>Bob maps errors to your codebase, identifies the root cause, and understands context — no manual log digging.</p>
+            </div>
+
+            <div class="feature-card">
+                <div class="feature-icon">
+                    <i class="fas fa-code-branch"></i>
+                </div>
+                <h3>Auto-Fix & PR Generation</h3>
+                <p>Bob writes the fix, runs QA/security checks, and opens a production-ready PR for your review. One click to escalate.</p>
+            </div>
+        </div>
+    </section>
+
+    <section class="workflow" id="workflow">
+        <div class="section-title">
+            <h2>How BobOps Works</h2>
+            <p>From incident to pull request in 4 simple steps</p>
+        </div>
+
+        <div class="steps">
+            <div class="step">
+                <div class="step-number">1</div>
+                <h4>Connect Repo</h4>
+                <p>Link your GitHub repository and start monitoring</p>
+            </div>
+            <div class="step">
+                <div class="step-number">2</div>
+                <h4>Monitor Logs</h4>
+                <p>Bob watches production logs in real-time</p>
+            </div>
+            <div class="step">
+                <div class="step-number">3</div>
+                <h4>Escalate to Bob</h4>
+                <p>Click an incident and say "Bob, fix this"</p>
+            </div>
+            <div class="step">
+                <div class="step-number">4</div>
+                <h4>Review & Merge</h4>
+                <p>Bob opens a PR. You review. Ship with confidence.</p>
+            </div>
+        </div>
+    </section>
+
+    <script src="/assets/js/index.js"></script>
+</body>
+
+</html>

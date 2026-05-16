@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Repositories | BobOps</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+    <link rel="stylesheet" href="/assets/css/repo.css" />
+</head>
+
+<body>
+    <div class="bg-animation"></div>
+    <div class="particles"></div>
+
+    <header>
+        <a href="/" class="logo">
+            <i class="fas fa-robot"></i>
+            BobOps
+        </a>
+        <nav class="nav-actions">
+            <a href="/">Home</a>
+            <a href="/repo" class="active">Repositories</a>
+            <a href="/incidents">Incidents</a>
+            <a href="/settings">Settings</a>
+        </nav>
+    </header>
+
+    <main>
+        {% if not repos %}
+        <div class="empty-state" id="emptyState">
+            <div class="empty-icon">
+                <i class="fas fa-folder-open"></i>
+            </div>
+            <h3>No repositories connected</h3>
+            <p>Connect your first GitHub repository to start monitoring production incidents and let Bob fix them automatically.</p>
+            <button class="btn btn-primary" onclick="openModal()">
+                <i class="fas fa-plus"></i>
+                Connect Repository
+            </button>
+        </div>
+        {% endif %}
+
+        {% if repos %}
+        <div class="repos-container" id="reposTable">
+            <div class="table-header">
+                <h3>Active Repositories</h3>
+                <span class="repo-count">{{ repos|length }} connected</span>
+            </div>
+            <table>
+                <thead>
+                    <tr>
+                        <th>#</th>
+                        <th>Repository</th>
+                        <th>Summary</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for repo in repos %}
+                    <tr>
+                        <td class="repo-index">{{ loop.index }}</td>
+                        <td>
+                            <div class="repo-info">
+                                <div class="repo-avatar">
+                                    {{ repo.username[0]|upper }}
+                                </div>
+                                <div class="repo-details">
+                                    <h4>{{ repo.name }}</h4>
+                                    <span class="repo-full">{{ repo.username }}/{{ repo.name }}</span>
+                                </div>
+                            </div>
+                        </td>
+                        <td>
+                            <div class="repo-summary" title="{{ repo.summary }}">
+                                {{ repo.summary[:80] }}{% if repo.summary|length > 80 %}...{% endif %}
+                            </div>
+                        </td>
+                        <td>
+                            <div class="repo-actions">
+                                <button class="btn-icon success" title="Monitor" onclick="startMonitoring('{{ repo.username }}/{{ repo.name }}')">
+                                    <i class="fas fa-play"></i>
+                                </button>
+                                <button class="btn-icon danger" title="Remove" onclick="removeRepo('{{ repo.username }}/{{ repo.name }}')">
+                                    <i class="fas fa-trash"></i>
+                                </button>
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% endif %}
+    </main>
+
+    {% if repos %}
+    <button class="fab" id="fab" onclick="openModal()" title="Add Repository">
+        <i class="fas fa-plus"></i>
+    </button>
+    {% endif %}
+
+    <div class="modal-overlay" id="modalOverlay">
+        <div class="modal">
+            <div class="modal-header">
+                <h3><i class="fas fa-link"></i> Connect Repository</h3>
+                <button class="modal-close" onclick="closeModal()">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <form id="cloneForm" action="/repo" method="POST">
+                <div class="form-group">
+                    <label for="repoName">GitHub Repository</label>
+                    <input type="text" id="repoName" name="name" placeholder="username/reponame" pattern="^[\w\-\.]+/[\w\-\.]+$" title="Enter in format: username/reponame" required autofocus />
+                    <div class="form-hint">
+                        <i class="fas fa-info-circle"></i>
+                        Use GitHub standard format: <code>username/reponame</code> or full URL
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" onclick="closeModal()">
+                        Cancel
+                    </button>
+                    <button type="submit" class="btn btn-primary" id="cloneBtn">
+                        <i class="fas fa-cloud-download-alt"></i>
+                        Clone Repository
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div class="toast" id="toast">
+        <i class="fas fa-check-circle"></i>
+        <span id="toastMessage">Operation successful</span>
+    </div>
+
+    <script src="/assets/js/repo.js"></script>
+</body>
+
+</html>
